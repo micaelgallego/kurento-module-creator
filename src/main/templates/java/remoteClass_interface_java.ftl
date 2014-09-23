@@ -123,11 +123,31 @@ done. If an error occurs, {@link Continuation#onError} is called.
 
 	<#if !remoteClass.abstract && remoteClass.name != "MediaPipeline">
 
+    public static Builder with(<#rt>
+          <#assign first=true>
+          <#lt><#list remoteClass.constructor.params as param>
+          <#if !param.optional>
+              <#lt><#if first><#assign first=false><#else>, </#if><#rt>
+              <#lt>${getJavaObjectType(param.type,false)} ${param.name}<#rt>
+          </#if>
+          </#list>
+          <#lt>){
+       return new Builder(<#rt>
+          <#assign first=true>
+          <#lt><#list remoteClass.constructor.params as param>
+          <#if !param.optional>
+              <#lt><#if first><#assign first=false><#else>, </#if><#rt>
+              <#lt>${param.name}<#rt>
+          </#if>
+          </#list>
+          <#lt>);
+    }
+
     public static class Builder extends AbstractBuilder<${remoteClass.name}> {
 
 		<#assign doc="Creates a Builder for ${remoteClass.name}" />
 		<@comment doc param />
-		public Builder(<#rt>
+		Builder(<#rt>
         	<#assign first=true>
         	<#lt><#list remoteClass.constructor.params as param>
         	<#if !param.optional>
