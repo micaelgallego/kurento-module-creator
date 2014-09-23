@@ -121,7 +121,30 @@ done. If an error occurs, {@link Continuation#onError} is called.
     }
     </#list>
 
-	<#if !remoteClass.abstract && remoteClass.name != "MediaPipeline">
+  <#if remoteClass.name == "MediaPipeline">
+  
+    public static Builder with(KurentoClient client){
+       return new Builder(client);
+    }
+    
+    public static class Builder {
+    
+       KurentoClient client;
+    
+       Builder(KurentoClient client){
+          this.client = client;
+       }
+       
+       public MediaPipeline create(){
+          return new AbstractBuilder<MediaPipeline>(MediaPipeline.class, client.getFactory()).create();
+       }
+       
+       public void createAsync(final Continuation<MediaPipeline> continuation) {
+          new AbstractBuilder<MediaPipeline>(MediaPipeline.class, client.getFactory()).createAsync(continuation);
+       }
+    }
+  
+  <#elseif !remoteClass.abstract>
 
     public static Builder with(<#rt>
           <#assign first=true>
