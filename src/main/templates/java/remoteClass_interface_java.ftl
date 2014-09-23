@@ -15,8 +15,8 @@ import org.kurento.client.*;
 @org.kurento.client.internal.RemoteClass
 public class ${remoteClass.name} extends <#if remoteClass.extends??>${remoteClass.extends.name}<#else>AbstractMediaObject</#if> {
 
-   public ${remoteClass.name}(org.kurento.client.internal.client.RemoteObject remoteObject, org.kurento.client.internal.client.RomManager manager) {
-     super(remoteObject, manager);
+   public ${remoteClass.name}(org.kurento.client.internal.client.RemoteObject remoteObject) {
+     super(remoteObject);
    }
 
    <#list remoteClass.properties as property>
