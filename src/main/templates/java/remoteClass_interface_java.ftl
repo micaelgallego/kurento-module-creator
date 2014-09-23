@@ -15,8 +15,8 @@ import org.kurento.client.*;
 @org.kurento.client.internal.RemoteClass
 public class ${remoteClass.name} extends <#if remoteClass.extends??>${remoteClass.extends.name}<#else>AbstractMediaObject</#if> {
 
-   public ${remoteClass.name}(org.kurento.client.internal.client.RemoteObject remoteObject, org.kurento.client.internal.client.RemoteObjectFactory factory) {
-     super(remoteObject, factory);
+   public ${remoteClass.name}(org.kurento.client.internal.client.RemoteObject remoteObject, org.kurento.client.internal.client.RomManager manager) {
+     super(remoteObject, manager);
    }
 
    <#list remoteClass.properties as property>
@@ -136,11 +136,11 @@ done. If an error occurs, {@link Continuation#onError} is called.
        }
        
        public MediaPipeline create(){
-          return new AbstractBuilder<MediaPipeline>(MediaPipeline.class, client.getFactory()).create();
+          return new AbstractBuilder<MediaPipeline>(MediaPipeline.class, client.getRomManager()).create();
        }
        
        public void createAsync(final Continuation<MediaPipeline> continuation) {
-          new AbstractBuilder<MediaPipeline>(MediaPipeline.class, client.getFactory()).createAsync(continuation);
+          new AbstractBuilder<MediaPipeline>(MediaPipeline.class, client.getRomManager()).createAsync(continuation);
        }
     }
   
