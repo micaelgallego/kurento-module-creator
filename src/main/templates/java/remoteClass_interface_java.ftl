@@ -1,4 +1,4 @@
-${packageToFolder(module.code.api.java.packageName)}/${remoteClass.name}.java
+<#if remoteClass.name != "MediaPipeline">${packageToFolder(module.code.api.java.packageName)}/${remoteClass.name}.java
 <#include "macros.ftm" >
 /**
  * This file is generated with Kurento ktool-rom-processor.
@@ -15,7 +15,7 @@ import org.kurento.client.*;
 @org.kurento.client.internal.RemoteClass
 public class ${remoteClass.name} extends <#if remoteClass.extends??>${remoteClass.extends.name}<#else>AbstractMediaObject</#if> {
 
-   public ${remoteClass.name}(org.kurento.client.internal.client.RemoteObject remoteObject) {
+   public ${remoteClass.name}(org.kurento.client.internal.client.RemoteObjectFacade remoteObject) {
      super(remoteObject);
    }
 
@@ -121,30 +121,7 @@ done. If an error occurs, {@link Continuation#onError} is called.
     }
     </#list>
 
-  <#if remoteClass.name == "MediaPipeline">
-  
-    public static Builder with(KurentoClient client){
-       return new Builder(client);
-    }
-    
-    public static class Builder {
-    
-       KurentoClient client;
-    
-       Builder(KurentoClient client){
-          this.client = client;
-       }
-       
-       public MediaPipeline create(){
-          return new AbstractBuilder<MediaPipeline>(MediaPipeline.class, client.getRomManager()).create();
-       }
-       
-       public void createAsync(final Continuation<MediaPipeline> continuation) {
-          new AbstractBuilder<MediaPipeline>(MediaPipeline.class, client.getRomManager()).createAsync(continuation);
-       }
-    }
-  
-  <#elseif !remoteClass.abstract>
+  <#if !remoteClass.abstract>
 
     public static Builder with(<#rt>
           <#assign first=true>
@@ -207,6 +184,13 @@ done. If an error occurs, {@link Continuation#onError} is called.
 		</#if>
         </#if>
        </#list>
+
+       @Override
+       protected ${remoteClass.name} createMediaObject(org.kurento.client.internal.client.RemoteObjectFacade remoteObject) {
+          return new ${remoteClass.name}(remoteObject);
+       }
+
     }
 	</#if>
 }
+</#if>
