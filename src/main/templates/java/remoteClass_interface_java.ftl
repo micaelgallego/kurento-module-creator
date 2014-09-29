@@ -15,8 +15,8 @@ import org.kurento.client.*;
 @org.kurento.client.internal.RemoteClass
 public class ${remoteClass.name} extends <#if remoteClass.extends??>${remoteClass.extends.name}<#else>AbstractMediaObject</#if> {
 
-   public ${remoteClass.name}(org.kurento.client.internal.client.RemoteObjectFacade remoteObject) {
-     super(remoteObject);
+   public ${remoteClass.name}(org.kurento.client.internal.client.RemoteObjectFacade remoteObject, Transaction tx) {
+     super(remoteObject,tx);
    }
 
    <#list remoteClass.properties as property>
@@ -29,9 +29,21 @@ public class ${remoteClass.name} extends <#if remoteClass.extends??>${remoteClas
       return (${type})remoteObject.invoke("get${property.name?cap_first}", null, ${type}.class);
       </#if>
    }
-   </#list>
 
-   <#list remoteClass.properties as property>
+   public java.util.concurrent.Future<${getJavaObjectType(property.type,true)}> get${property.name?cap_first}(Transaction tx){
+      <#assign type = getJavaObjectType(property.type,true)>
+      <#if type?starts_with("java.util.List")>
+      java.lang.reflect.Type returnType = new com.google.common.reflect.TypeToken<${type}>(){}.getType();
+      return (java.util.concurrent.Future<${type}>)tx.<${type}>addOperation(new org.kurento.client.internal.client.operation.InvokeOperation(this, "get${property.name?cap_first}", null, returnType));
+      <#else>
+      return (java.util.concurrent.Future<${type}>)tx.<${type}>addOperation(new org.kurento.client.internal.client.operation.InvokeOperation(this, "get${property.name?cap_first}", null, ${type}.class));
+      </#if>
+   }
+
+   public java.util.concurrent.Future<${getJavaObjectType(property.type,true)}> get${property.name?cap_first}WhenReady(){
+      return get${property.name?cap_first}(this.getActiveTransaction());
+   }
+
    public void get${property.name?cap_first}(Continuation<${getJavaObjectType(property.type,true)}> cont){
       <#assign type = getJavaObjectType(property.type,false)>
       <#if type?starts_with("java.util.List")>
@@ -64,6 +76,34 @@ public class ${remoteClass.name} extends <#if remoteClass.extends??>${remoteClas
       return (${type})remoteObject.invoke("${method.name}", ${props}, returnType);
       <#else>
       return (${type})remoteObject.invoke("${method.name}", ${props}, ${type}.class);
+      </#if>
+   }
+
+   <@comment method.doc method.params method.return />
+   public java.util.concurrent.Future<${getJavaObjectType(method.return,true)}> ${method.name}WhenReady(<#rt>
+    <#lt><#list method.params as param>${getJavaObjectType(param.type,false)} ${param.name}<#if param_has_next>, </#if></#list>){
+      return ${method.name}(<#list method.params as param>${param.name},</#list>this.getActiveTransaction());
+   }
+
+   <@comment method.doc method.params method.return />
+   public java.util.concurrent.Future<${getJavaObjectType(method.return,true)}> ${method.name}(<#rt>
+    <#lt><#list method.params as param>${getJavaObjectType(param.type,false)} ${param.name}, </#list>Transaction tx){
+      <#assign props = "null">
+      <#if method.params?has_content>
+      <#assign props = "props">
+      org.kurento.jsonrpc.Props props = new org.kurento.jsonrpc.Props();
+      <#list method.params as param>
+      props.add("${param.name}", ${param.name});
+      </#list>
+      </#if>
+      <#assign type = getJavaObjectType(method.return,true)>
+      <#if type == "void">
+      tx.addOperation(new org.kurento.client.internal.client.operation.InvokeOperation(this, "${method.name}", ${props}, Void.class));
+      <#elseif type?starts_with("java.util.List")>
+      java.lang.reflect.Type returnType = new com.google.common.reflect.TypeToken<${type}>(){}.getType();
+      return (java.util.concurrent.Future<${type}>)tx.<${type}>addOperation(new org.kurento.client.internal.client.operation.InvokeOperation(this, "${method.name}", ${props}, returnType));
+      <#else>
+      return (java.util.concurrent.Future<${type}>)tx.<${type}>addOperation(new org.kurento.client.internal.client.operation.InvokeOperation(this, "${method.name}", ${props}, ${type}.class));
       </#if>
    }
 
@@ -186,8 +226,8 @@ done. If an error occurs, {@link Continuation#onError} is called.
        </#list>
 
        @Override
-       protected ${remoteClass.name} createMediaObject(org.kurento.client.internal.client.RemoteObjectFacade remoteObject) {
-          return new ${remoteClass.name}(remoteObject);
+       protected ${remoteClass.name} createMediaObject(org.kurento.client.internal.client.RemoteObjectFacade remoteObject, Transaction tx) {
+          return new ${remoteClass.name}(remoteObject, tx);
        }
 
     }
