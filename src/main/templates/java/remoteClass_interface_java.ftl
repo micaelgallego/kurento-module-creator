@@ -187,7 +187,8 @@ done. If an error occurs, {@link Continuation#onError} is called.
 
 		<#assign doc="Creates a Builder for ${remoteClass.name}" />
 		<@comment doc param />
-		Builder(<#rt>
+		@Deprecated
+		public Builder(<#rt>
         	<#assign first=true>
         	<#lt><#list remoteClass.constructor.params as param>
         	<#if !param.optional>
