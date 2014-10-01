@@ -32,11 +32,12 @@ public class ${remoteClass.name} extends <#if remoteClass.extends??>${remoteClas
 
    public java.util.concurrent.Future<${getJavaObjectType(property.type,true)}> get${property.name?cap_first}(Transaction tx){
       <#assign type = getJavaObjectType(property.type,true)>
+      TransactionImpl txImpl = (TransactionImpl)tx;
       <#if type?starts_with("java.util.List")>
       java.lang.reflect.Type returnType = new com.google.common.reflect.TypeToken<${type}>(){}.getType();
-      return (java.util.concurrent.Future<${type}>)tx.<${type}>addOperation(new org.kurento.client.internal.client.operation.InvokeOperation(this, "get${property.name?cap_first}", null, returnType));
+      return (java.util.concurrent.Future<${type}>)txImpl.<${type}>addOperation(new org.kurento.client.internal.client.operation.InvokeOperation(this, "get${property.name?cap_first}", null, returnType));
       <#else>
-      return (java.util.concurrent.Future<${type}>)tx.<${type}>addOperation(new org.kurento.client.internal.client.operation.InvokeOperation(this, "get${property.name?cap_first}", null, ${type}.class));
+      return (java.util.concurrent.Future<${type}>)txImpl.<${type}>addOperation(new org.kurento.client.internal.client.operation.InvokeOperation(this, "get${property.name?cap_first}", null, ${type}.class));
       </#if>
    }
 
@@ -97,13 +98,14 @@ public class ${remoteClass.name} extends <#if remoteClass.extends??>${remoteClas
       </#list>
       </#if>
       <#assign type = getJavaObjectType(method.return,true)>
+      TransactionImpl txImpl = (TransactionImpl)tx;
       <#if type == "void">
-      tx.addOperation(new org.kurento.client.internal.client.operation.InvokeOperation(this, "${method.name}", ${props}, Void.class));
+      txImpl.addOperation(new org.kurento.client.internal.client.operation.InvokeOperation(this, "${method.name}", ${props}, Void.class));
       <#elseif type?starts_with("java.util.List")>
       java.lang.reflect.Type returnType = new com.google.common.reflect.TypeToken<${type}>(){}.getType();
-      return (java.util.concurrent.Future<${type}>)tx.<${type}>addOperation(new org.kurento.client.internal.client.operation.InvokeOperation(this, "${method.name}", ${props}, returnType));
+      return (java.util.concurrent.Future<${type}>)txImpl.<${type}>addOperation(new org.kurento.client.internal.client.operation.InvokeOperation(this, "${method.name}", ${props}, returnType));
       <#else>
-      return (java.util.concurrent.Future<${type}>)tx.<${type}>addOperation(new org.kurento.client.internal.client.operation.InvokeOperation(this, "${method.name}", ${props}, ${type}.class));
+      return (java.util.concurrent.Future<${type}>)txImpl.<${type}>addOperation(new org.kurento.client.internal.client.operation.InvokeOperation(this, "${method.name}", ${props}, ${type}.class));
       </#if>
    }
 
