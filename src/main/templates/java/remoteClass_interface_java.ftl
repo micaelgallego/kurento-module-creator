@@ -32,26 +32,12 @@ public class ${remoteClass.name} extends <#if remoteClass.extends??>${remoteClas
 
    public java.util.concurrent.Future<${getJavaObjectType(property.type,true)}> get${property.name?cap_first}(Transaction tx){
       <#assign type = getJavaObjectType(property.type,true)>
-      TransactionImpl txImpl = (TransactionImpl)tx;
+      org.kurento.client.internal.TransactionImpl txImpl = (org.kurento.client.internal.TransactionImpl)tx;
       <#if type?starts_with("java.util.List")>
       java.lang.reflect.Type returnType = new com.google.common.reflect.TypeToken<${type}>(){}.getType();
       return (java.util.concurrent.Future<${type}>)txImpl.<${type}>addOperation(new org.kurento.client.internal.client.operation.InvokeOperation(this, "get${property.name?cap_first}", null, returnType));
       <#else>
       return (java.util.concurrent.Future<${type}>)txImpl.<${type}>addOperation(new org.kurento.client.internal.client.operation.InvokeOperation(this, "get${property.name?cap_first}", null, ${type}.class));
-      </#if>
-   }
-
-   public java.util.concurrent.Future<${getJavaObjectType(property.type,true)}> get${property.name?cap_first}WhenReady(){
-      return get${property.name?cap_first}(this.getActiveTransaction());
-   }
-
-   public void get${property.name?cap_first}(Continuation<${getJavaObjectType(property.type,true)}> cont){
-      <#assign type = getJavaObjectType(property.type,false)>
-      <#if type?starts_with("java.util.List")>
-      java.lang.reflect.Type returnType = new com.google.common.reflect.TypeToken<${type}>(){}.getType();
-      remoteObject.invoke("get${property.name?cap_first}", null, returnType, cont);
-      <#else>
-      remoteObject.invoke("get${property.name?cap_first}", null, ${type}.class, cont);
       </#if>
    }
    </#list>
@@ -81,14 +67,9 @@ public class ${remoteClass.name} extends <#if remoteClass.extends??>${remoteClas
    }
 
    <@comment method.doc method.params method.return />
-   public java.util.concurrent.Future<${getJavaObjectType(method.return,true)}> ${method.name}WhenReady(<#rt>
-    <#lt><#list method.params as param>${getJavaObjectType(param.type,false)} ${param.name}<#if param_has_next>, </#if></#list>){
-      return ${method.name}(<#list method.params as param>${param.name},</#list>this.getActiveTransaction());
-   }
-
-   <@comment method.doc method.params method.return />
-   public java.util.concurrent.Future<${getJavaObjectType(method.return,true)}> ${method.name}(<#rt>
-    <#lt><#list method.params as param>${getJavaObjectType(param.type,false)} ${param.name}, </#list>Transaction tx){
+   <#assign type = getJavaObjectType(method.return,true)>
+   public <#if type == "Void">void<#else>java.util.concurrent.Future<${type}></#if> ${method.name}(Transaction tx<#rt>
+    <#lt><#list method.params as param>, ${getJavaObjectType(param.type,false)} ${param.name}</#list>){
       <#assign props = "null">
       <#if method.params?has_content>
       <#assign props = "props">
@@ -97,44 +78,14 @@ public class ${remoteClass.name} extends <#if remoteClass.extends??>${remoteClas
       props.add("${param.name}", ${param.name});
       </#list>
       </#if>
-      <#assign type = getJavaObjectType(method.return,true)>
-      TransactionImpl txImpl = (TransactionImpl)tx;
-      <#if type == "void">
+      org.kurento.client.internal.TransactionImpl txImpl = (org.kurento.client.internal.TransactionImpl)tx;
+      <#if type == "Void">
       txImpl.addOperation(new org.kurento.client.internal.client.operation.InvokeOperation(this, "${method.name}", ${props}, Void.class));
       <#elseif type?starts_with("java.util.List")>
       java.lang.reflect.Type returnType = new com.google.common.reflect.TypeToken<${type}>(){}.getType();
       return (java.util.concurrent.Future<${type}>)txImpl.<${type}>addOperation(new org.kurento.client.internal.client.operation.InvokeOperation(this, "${method.name}", ${props}, returnType));
       <#else>
       return (java.util.concurrent.Future<${type}>)txImpl.<${type}>addOperation(new org.kurento.client.internal.client.operation.InvokeOperation(this, "${method.name}", ${props}, ${type}.class));
-      </#if>
-   }
-
-	<#assign doc>
-Asynchronous version of ${method.name}:
-{@link Continuation#onSuccess} is called when the action is
-done. If an error occurs, {@link Continuation#onError} is called.
-
-@see ${remoteClass.name}#${method.name}
-    </#assign>
-    <@comment doc method.params />
-    public void ${method.name}(<#rt>
-		<#lt><#list method.params as param>${getJavaObjectType(param.type,false)} ${param.name}, </#list>Continuation<${getJavaObjectType(method.return)}> cont){
-      <#assign props = "null">
-      <#if method.params?has_content>
-      <#assign props = "props">
-      org.kurento.jsonrpc.Props props = new org.kurento.jsonrpc.Props();
-      <#list method.params as param>
-      props.add("${param.name}", ${param.name});
-      </#list>
-      </#if>
-      <#assign type = getJavaObjectType(method.return,false)>
-      <#if type == "void">
-      remoteObject.invoke("${method.name}", ${props}, Void.class, cont);
-      <#elseif type?starts_with("java.util.List")>
-      java.lang.reflect.Type returnType = new com.google.common.reflect.TypeToken<${type}>(){}.getType();
-      remoteObject.invoke("${method.name}", ${props}, returnType, cont);
-      <#else>
-      remoteObject.invoke("${method.name}", ${props}, ${type}.class, cont);
       </#if>
    }
 
@@ -149,17 +100,6 @@ done. If an error occurs, {@link Continuation#onError} is called.
      **/
     public ListenerSubscription add${event.name}Listener(EventListener<${event.name}Event> listener){
         return subscribeEventListener(listener, ${event.name}Event.class, null);
-    }
-    /**
-     * Add a {@link EventListener} for event {@link ${event.name}Event}. Asynchronous call.
-     * Calls Continuation&lt;ListenerSubscription&gt; when it has been added.
-     *
-     * @param listener Listener to be called on ${event.name}Event
-     * @param cont     Continuation to be called when the listener is registered
-     *
-     **/
-    public void add${event.name}Listener(EventListener<${event.name}Event> listener, Continuation<ListenerSubscription> cont){
-        subscribeEventListener(listener, ${event.name}Event.class, cont);
     }
     </#list>
 
