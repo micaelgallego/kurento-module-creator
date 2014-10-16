@@ -13,7 +13,7 @@ import org.kurento.client.*;
 
 <@comment remoteClass.doc />
 @org.kurento.client.internal.RemoteClass
-public class ${remoteClass.name} extends <#if remoteClass.extends??>${remoteClass.extends.name}<#else>AbstractMediaObject</#if> {
+public class ${remoteClass.name} extends <#if remoteClass.extends??>${remoteClass.extends.name}<#else>KurentoObject</#if> {
 
    public ${remoteClass.name}(org.kurento.client.internal.client.RemoteObjectFacade remoteObject, Transaction tx) {
      super(remoteObject,tx);
@@ -99,7 +99,7 @@ public class ${remoteClass.name} extends <#if remoteClass.extends??>${remoteClas
      *
      **/
     public ListenerSubscription add${event.name}Listener(EventListener<${event.name}Event> listener){
-        return subscribeEventListener(listener, ${event.name}Event.class, null);
+        return subscribeEventListener(listener, ${event.name}Event.class);
     }
     </#list>
 
